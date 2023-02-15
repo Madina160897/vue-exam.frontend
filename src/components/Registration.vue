@@ -1,7 +1,11 @@
 <script>
-const BASE_URL = "http://localhost:8080";
+import localhost from '../localhost/localhost';
 
 export default {
+    components: {
+        localhost
+    },
+
     data() {
         return {
             user: [],
@@ -26,8 +30,8 @@ export default {
 
             console.log(newEmail);
 
-            if (newEmail) {
-                fetch(BASE_URL + "/emails/regis", {
+            if (this.checkErrors(newEmail)) {
+                fetch(localhost.BASE_URL + "/emails/regis", {
                     method: "post",
                     headers: {
                         'Accept': 'application/json',
@@ -42,68 +46,56 @@ export default {
             }
         },
 
-        // checkDate(newEmail) {
-        //     if (!validateEmail(newEmail.email)) {
-        //         alert("Incorrect email!")
-        //         return false
-        //     } if (!validatePassword(newEmail.password)) {
-        //         alert("Incorrect password!")
-        //         return false
-        //     } if (!validateAge(newEmail.age)) {
-        //         alert("Incorrect age!")
-        //         return false
-        //     } else if (newEmail.name.length < 1 || newEmail.surname.length < 1 || newEmail.password.length < 1 || newEmail.age.length < 1) {
-        //         alert("Complete all data!")
-        //         return false;
-        //     } else {
-        //         return true
-        //     }
-        // },
 
-        // checkData() {
-        //     if (this.email === '' || this.password === '' || this.name === '' || this.surname === '' || this.age === '') {
-        //         this.error = 'Fill in all the fields';
-        //         return false;
-        //     }
-        //     return true;
-        // },
+        checkData() {
+            if (this.email === '' || this.password === '' || this.name === '' || this.surname === '' || this.age === '') {
+                this.error = 'Fill in all the fields';
+                return false;
+            }
+            return true;
+        },
 
-    //     validateEmail(email) {
-    //         return String(email)
-    //             .toLowerCase()
-    //             .match(
-    //                 /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    //             );
-    //     },
+        validateEmail() {
+            let reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+            if (reg.test(this.email) === false) {
+                this.error = "Enter a valid email address";
+                alert("Неверный e-mail адрес!");
+                return false;
+            }
+            return true;
+        },
 
-    //     validatePassword(password) {
-    //         return String(password)
-    //             .match(
-    //                 /^\S*(?=.*[A-Z])(?=.*[0-9])(?=.*[/$!*])[a-zA-Z0-9*/$!]{8,}\S*$/g
-    //             );
-    //     },
+        validatePassword() {
+            let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
+            if (reg.test(this.password) === false) {
+                this.error = "Enter a strong password";
+                alert("Пароль должен состоять из букв латинского алфавита (A-z), арабских цифр (0-9) и специальных символов");
+                return false;
+            }
+            return true;
+        },
 
-    //     validateAge(age) {
-    //         return String(age)
-    //             .match(
-    //                 /^[1-9][0-9]$|^[1-9]$|^100$/
-    //             );
-    //     },
+        checkErrors() {
+            if (this.checkData() && this.validateEmail() && this.validatePassword()) {
+                return true;
+            }
+            return false;
+        },
     }
 }
 </script>
 
 <template>
     <div class="login">
-        <b class="mt-20 reg-title">Registration</b>
-        <input v-model="email" class="mt-20 input email-reg" type="email" placeholder="email">
-        <input v-model="password" class="mt-10 input password-reg" type="password" placeholder="password">
-        <input v-model="name" class="mt-10 input name-reg" type="text" placeholder="name">
-        <input v-model="surname" class="mt-10 input surname-reg" type="text" placeholder="surname">
-        <input v-model="age" class="mt-10 input age-reg" type="number" placeholder="age">
+        <b class="mt-20 reg-title">Регистрация</b>
+        <input v-model="email" class="mt-20 input email-reg" type="email" placeholder="Электронная почта">
+        <input v-model="password" class="mt-10 input password-reg" type="password" placeholder="Пароль">
+        <input v-model="name" class="mt-10 input name-reg" type="text" placeholder="Имя">
+        <input v-model="surname" class="mt-10 input surname-reg" type="text" placeholder="Фамилия">
+        <input v-model="age" class="mt-10 input age-reg" type="number" placeholder="Возраст">
 
         <div>
-            <button class="btn-reg mt-20" @click="signUp">Sign up</button>
+            <button class="btn-reg mt-20" @click="signUp">Зарегистрироваться</button>
         </div>
     </div>
 </template>

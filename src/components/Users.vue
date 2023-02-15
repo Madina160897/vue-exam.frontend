@@ -1,13 +1,65 @@
-<script >
+<script>
+import localhost from '../localhost/localhost';
+
 export default {
+    components: {
+        localhost
+    },
+
     data() {
         return {
-            usersNew: JSON.parse(localStorage.getItem('Users')),          
+            usersNew: JSON.parse(localStorage.getItem('user')),
+            allUsers: []
         }
     },
     methods: {
-        
-    }
+        async postData(route, payload) {
+            await fetch( localhost.BASE_URL + route, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: payload
+                },
+            )
+                .then(() => console.log("parsed"))
+                .catch(() => console.log("Error sending request"));
+        },
+
+        followAd (followedUserId) {
+
+            const payload = {
+                userId: this.usersNew._id,
+                followedUserId: followedUserId
+            }
+            const jsonPayload = JSON.stringify(payload);
+            this.postData("/emails/follow", jsonPayload);
+            this.usersNew.follows.push(followedUserId)
+            localStorage.setItem("user", JSON.stringify(this.usersNew))
+        },
+
+        unFollowAuthor (followedUserId) {
+
+            const payload = {
+                userId: this.usersNew._id,
+                followedUserId: followedUserId
+            }
+            const jsonPayload = JSON.stringify(payload);
+            this.postData("/emails/unfollow", jsonPayload);
+            this.usersNew.follows = this.usersNew.follows.filter((id) => id != followedUserId)
+            localStorage.setItem("user", JSON.stringify(this.usersNew))
+        },
+
+        logOut() {
+            localStorage.removeItem("user")
+            this.$router.push('/auth')
+        }
+    },
+    created() {
+    let users = JSON.parse(localStorage.getItem("Users"));
+    this.allUsers = users.filter((item) => item._id !== this.usersNew._id);
+  },
 }
 </script>
 
@@ -28,14 +80,14 @@ export default {
                     </router-link>
                 </div>
                 <div class="more_div"></div>
-                <button class="exit">Выйти</button>
+                <button class="exit" @click="logOut">Выйти</button>
             </div>
         </header>
 
         <main>
 
-            <div class="users_block" >
-                <div class="table-user" v-for="usr in usersNew" v-key="usr.id">
+            <div class="users_block">
+                <div class="table-user" v-for="usr in allUsers" v-key="usr._id">
 
                     <div class="img-sn">
 
@@ -44,14 +96,21 @@ export default {
                         </div>
 
                         <div class="name-sn">
-                            <b class="surname-user ml-5"> {{ usr.surname }} </b> <b class="name-user ml-5"> {{ usr.name }}
+                            <b class="surname-user ml-5"> {{ usr.surname }} </b> <b class="name-user ml-5"> {{
+                                usr.name
+                            }}
                             </b>
                         </div>
                     </div>
 
                     <div class="btn-user">
-                        <button class="btn-reg"> Подписаться </button>
-                        <button class="btn-reg"> Отписаться </button>
+                        <button  v-if="this.usersNew.follows.includes(usr._id)" @click="unFollowAuthor(usr._id)"
+                        class="btn-reg-unfollow">
+                            Отписаться
+                        </button>
+                        <button v-else @click="followAd(usr._id)" class="btn-reg-follow">
+                            Подписаться
+                        </button>
                     </div>
                 </div>
             </div>

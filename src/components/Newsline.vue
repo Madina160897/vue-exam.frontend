@@ -1,29 +1,46 @@
 <script>
-const BASE_URL = "http://localhost:8080";
+import localhost from '../localhost/localhost';
 
 export default {
+    components: {
+        localhost
+    },
+
     data() {
         return {
-            postsNew: JSON.parse(localStorage.getItem('Posts')),          
+            posts: [],
         }
     },
-    mounted() {
-        fetch(BASE_URL + "/post")
-            .then(response => response.json())
-            .then(data => localStorage.setItem('Posts', JSON.stringify(data)))
-            .catch(() => console.log(err));
-    },
+
     methods: {
+        backPost() {
+            fetch(localhost.BASE_URL + "/post")
+                .then(response => response.json())
+                .then((data) => { this.posts = data })
+                .catch(() => console.log(err));
+        },
+
         async likePost(postId) {
-            await fetch(BASE_URL + `/post/like/${postId}`);
-            loadData();
+            await fetch(localhost.BASE_URL + `/post/like/${postId}`);
         },
 
         async unlikePost(postId) {
-            await fetch(BASE_URL + `/post/unlike/${postId}`);
-            loadData();
+            await fetch(localhost.BASE_URL + `/post/unlike/${postId}`);
+        },
+
+        logOut() {
+            localStorage.removeItem("user")
+            this.$router.push('/auth')
         }
     },
+
+    created() {
+        this.backPost()
+    },
+
+    updated() {
+        this.backPost()
+    }
 }
 </script>
 
@@ -46,13 +63,13 @@ export default {
                     </router-link>
                 </div>
                 <div class="more_div"></div>
-                <button class="exit">Выйти</button>
+                <button class="exit" @click="logOut">Выйти</button>
             </div>
         </header>
 
         <main>
             <div class="posts_block">
-                <div class="post-block-box" v-for="item in postsNew" v-key="item.id">
+                <div class="post-block-box" v-for="item in posts" v-key="item._id">
                     <div class="img-sn">
                         <div>
                             <img class="img-user" src="../img/png-transparent-computer-icons-user-user-icon.png">
@@ -69,12 +86,12 @@ export default {
                         <img class="post-img" :src="item.img"> <br>
 
                         <div>
-                            <div>
-                                <button @click="likePost('{{item._id}}')"> <img class="acc"
+                            <div class="btn_like">
+                                <button class="btn-like" @click="likePost(item._id)"> <img class="acc"
                                         src="../img/free-icon-thumb-up-3193028.png">
-                                    {{ item.like }}</button>
-                                <button @click="unlikePost('{{item._id}}')"><img class="acc" src="../img/dislike.png">
-                                    {{ item.like }}</button>
+                                    </button>
+                                    <div class="like">{{ item.like }}</div>
+                                <button class="btn-like" @click="unlikePost(item._id)"><img class="acc" src="../img/dislike.png"></button>
                             </div>
                         </div>
                     </div>
